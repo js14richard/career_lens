@@ -2,11 +2,19 @@
   "name": "career_lens",
   "version": "1.0.0",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-    
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
   },
   "author": "Siril Richard",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "mongoose": "^8.20.2",
+    "nodemon": "^3.1.11"
+  }
 }
