@@ -6,6 +6,8 @@ import connectDB from "./config/db.js";
 
 import authRoutes from "./routes/auth_routes.js";
 import userRoutes from "./routes/user_routes.js";
+import jobRoutes from "./routes/job_routes.js";
+
 
 const app = express();
 
@@ -21,5 +23,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);
+app.use("/api/jobs", jobRoutes);
+
 
 export default app;
