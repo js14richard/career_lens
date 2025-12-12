@@ -1,5 +1,5 @@
 import User from "../models/User.js";
-import uploadToCloudinary from "../services/cloudinaryUpload.js";
+import {uploadProfileImageToCloudinary} from "../services/cloudinaryUpload.js";
 
 // GET LOGGED-IN USER PROFILE
 export const getUserProfile = async (req, res) => {
@@ -43,20 +43,25 @@ export const uploadProfilePicture = async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ message: "No image file provided" });
     }
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
+    if (!allowedTypes.includes(req.file.mimetype)) {
+      return res.status(400).json({ message: "Invalid file type. Only images are allowed." });
+    }
 
-    const imageUrl = await uploadToCloudinary(req.file.path);
+    const { url, publicId } = await uploadProfileImageToCloudinary(req.file.path);
 
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
       {
-        "profile.pictureUrl": imageUrl
+        "profile.pictureUrl": url,     
+        "profile.picturePublicId": publicId
       },
       { new: true }
     );
 
     res.status(200).json({
       message: "Profile picture updated",
-      pictureUrl: imageUrl,
+      pictureUrl: url,
       user: updatedUser
     });
   } catch (error) {

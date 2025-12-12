@@ -1,26 +1,62 @@
 import { v2 as cloudinary } from "cloudinary";
+import fs from "fs";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// Upload function
-const uploadToCloudinary = async (filePath) => {
+/**
+ * Upload Profile Image
+ */
+export const uploadProfileImageToCloudinary = async (filePath) => {
   try {
     const result = await cloudinary.uploader.upload(filePath, {
-      folder: process.env.CLOUDINARY_FOLDER,
+      folder: process.env.CLOUDINARY_PROFILE_FOLDER,
       transformation: [
         { width: 512, height: 512, crop: "fill", gravity: "face" }
       ]
     });
 
-    return result.secure_url;
+    fs.unlinkSync(filePath); // Remove temp file
+
+    return {
+      url: result.secure_url,
+      publicId: result.public_id
+    };
   } catch (error) {
-    console.error("Cloudinary upload error:", error);
-    throw new Error("Image upload failed");
+    console.error("Cloudinary Profile Upload Error:", error);
+
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+
+    throw new Error("Profile image upload failed");
   }
 };
 
-export default uploadToCloudinary;
+
+
+/**
+ * Upload Resume (PDF/DOCX)
+ */
+export const uploadResumeToCloudinary = async (filePath) => {
+  try {
+    const result = await cloudinary.uploader.upload(filePath, {
+      folder: process.env.CLOUDINARY_RESUME_FOLDER,
+      resource_type: "auto" // allows pdf/docx
+    });
+
+    fs.unlinkSync(filePath);
+
+    return {
+      url: result.secure_url,
+      publicId: result.public_id
+    };
+  } catch (error) {
+    console.error("Cloudinary Resume Upload Error:", error);
+
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+
+    throw new Error("Resume upload failed");
+  }
+};

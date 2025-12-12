@@ -13,10 +13,14 @@ const resumeSchema = new mongoose.Schema(
       required: true
     },
 
+    publicId: {
+      type: String,
+      required: true
+    },
+
     textContent: {
-        type: String, 
-        required: true, 
-        default :""
+      type: String,
+      default: ""
     },
 
     summary: {
