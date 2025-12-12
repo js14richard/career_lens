@@ -1,2 +1,3 @@
-__pycache__/
+resume_ai/__pycache__/
+resume_ai/**/__pycache__/
 *.pyc
