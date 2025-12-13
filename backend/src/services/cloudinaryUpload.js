@@ -43,7 +43,8 @@ export const uploadResumeToCloudinary = async (filePath) => {
   try {
     const result = await cloudinary.uploader.upload(filePath, {
       folder: process.env.CLOUDINARY_RESUME_FOLDER,
-      resource_type: "auto" // allows pdf/docx
+      resource_type: "raw",
+      type: "authenticated"
     });
 
     fs.unlinkSync(filePath);
@@ -59,4 +60,14 @@ export const uploadResumeToCloudinary = async (filePath) => {
 
     throw new Error("Resume upload failed");
   }
+};
+
+
+export const generateSignedResumeUrl = (publicId) => {
+  return cloudinary.url(publicId, {
+    resource_type: "raw",
+    type: "authenticated",
+    sign_url: true,
+    expires_at: Math.floor(Date.now() / 1000) + 300 // 5 minutes
+  });
 };

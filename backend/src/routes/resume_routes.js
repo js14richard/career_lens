@@ -5,8 +5,10 @@ import upload from "../middleware/multer.js";
 import {
   uploadResume,
   getMyResumes,
-  deleteResume
+  deleteResume,
+  analyzeResume
 } from "../controllers/resume_controller.js";
+
 
 const router = express.Router();
 
@@ -40,5 +42,11 @@ router.delete(
   role("applicant"),
   deleteResume
 );
+
+
+/**
+ * Analyze resume using AI
+ */
+router.post("/analyze", auth, analyzeResume);
 
 export default router;

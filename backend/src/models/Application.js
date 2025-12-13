@@ -29,7 +29,8 @@ const applicationSchema = new mongoose.Schema(
     analysis: {
       matchScore: { type: Number, default: 0 },
       missingSkills: { type: [String], default: [] },
-      summary: { type: String, default: "" }
+      summary: { type: String, default: "" },
+      aiFeedback: { type: String, default: "" }
     }
   },
   { timestamps: true }

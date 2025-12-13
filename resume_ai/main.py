@@ -21,14 +21,12 @@ def root():
 @app.post("/extract-text")
 def extract_text(payload: FileURL):
     file_url = payload.file_url
-
-    # Step 1: Download the file
+    print(f"file_url siril ${file_url}")
     try:
         local_path = download_file_from_url(file_url)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to download file: {str(e)}")
 
-    # Step 2: Determine file type
     ext = os.path.splitext(local_path)[1].lower()
 
     try:

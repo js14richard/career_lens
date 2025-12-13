@@ -1,61 +1,67 @@
+import Resume from "../models/Resume.js";
 import Application from "../models/Application.js";
 import Job from "../models/Job.js";
+import { calculateJobMatch } from "../utils/jobMatch.js";
+import { generateJobFitExplanation } from "../services/jobFitAIService.js";
 
 /**
  * Apply to a job (Applicant Only)
+ * 1. Ensures the resume has been analyzed using AI.
+ * 2. Calculates job match score by comparing resume skills with job skills.
+ * 3. Identifies missing skills required for the job
+ * 4. Generates an AI-based explanation for the match result
+ * 5. Creates a job application with match analysis stored
 */
 export const applyToJob = async (req, res) => {
   try {
     const applicantId = req.user._id;
     const { jobId } = req.params;
-    const { resumeId } = req.body;
-
-    if (!resumeId) {
-      return res.status(400).json({
-        success: false,
-        message: "resumeId is required"
-      });
-    }
 
     const job = await Job.findById(jobId);
     if (!job) {
       return res.status(404).json({ success: false, message: "Job not found" });
     }
 
-    if (job.postedBy.toString() === applicantId.toString()) {
+    const resume = await Resume.findOne({ userId: applicantId });
+    if (!resume || !resume.skills.length) {
       return res.status(400).json({
         success: false,
-        message: "You cannot apply to your own job posting"
+        message: "Please upload and analyze your resume before applying"
       });
     }
 
-    const existingApplication = await Application.findOne({
-      jobId,
-      applicantId
-    });
+    const { matchScore, explanation } = calculateJobMatch(job, resume);
 
-    if (existingApplication) {
-      return res.status(400).json({
-        success: false,
-        message: "You have already applied to this job"
-      });
-    }
+    const aiFeedback = await generateJobFitExplanation(
+      explanation,
+      job.experience
+    );
 
     const application = await Application.create({
       jobId,
       applicantId,
-      resumeId,
-      status: "applied"
+      resumeId: resume._id,
+      status: "applied",
+      analysis: {
+        matchScore,
+        missingSkills: explanation.missingSkills,
+        summary: resume.summary,
+        aiFeedback
+      }
     });
 
     res.status(201).json({
       success: true,
-      message: "Application submitted successfully",
+      message: "Job applied successfully",
       application
     });
+
   } catch (error) {
     console.error("Apply Job Error:", error);
-    res.status(500).json({ success: false, message: "Error while applying to job" });
+    res.status(500).json({
+      success: false,
+      message: "Error while applying to job"
+    });
   }
 };
 
@@ -86,15 +92,17 @@ export const getMyApplications = async (req, res) => {
 
 
 /**
- * Get all applicants for a job (Recruiter Only)
-*/
+ * Get applicants for a job (Recruiter Only)
+ * Supports filtering and sorting by match score
+ */
 export const getApplicantsForJob = async (req, res) => {
   try {
     const recruiterId = req.user._id;
     const { jobId } = req.params;
+    let { minScore, sort } = req.query;
+    if (!minScore) minScore = 0;
 
     const job = await Job.findById(jobId);
-
     if (!job) {
       return res.status(404).json({ success: false, message: "Job not found" });
     }
@@ -102,22 +110,37 @@ export const getApplicantsForJob = async (req, res) => {
     if (job.postedBy.toString() !== recruiterId.toString()) {
       return res.status(403).json({
         success: false,
-        message: "You do not have permission to view applicants for this job"
+        message: "You are not authorized to view applicants for this job"
       });
     }
 
-    const applications = await Application.find({ jobId })
+    const filter = { jobId };
+
+    if (minScore) {
+      filter["analysis.matchScore"] = { $gte: Number(minScore) };
+    }
+
+    const sortOrder =
+      sort === "asc"
+        ? { "analysis.matchScore": 1 }
+        : { "analysis.matchScore": -1 }; // desc by default 
+
+    const applications = await Application.find(filter)
       .populate("applicantId", "name email profile pictureUrl")
-      .populate("resumeId", "skills summary");
+      .sort(sortOrder);
 
     res.status(200).json({
       success: true,
-      job: job.title,
+      count: applications.length,
       applicants: applications
     });
+
   } catch (error) {
     console.error("Get Applicants Error:", error);
-    res.status(500).json({ success: false, message: "Error while fetching applicants" });
+    res.status(500).json({
+      success: false,
+      message: "Error while fetching applicants"
+    });
   }
 };
 
