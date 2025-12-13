@@ -73,10 +73,25 @@ export const applyToJob = async (req, res) => {
 export const getMyApplications = async (req, res) => {
   try {
     const applicantId = req.user._id;
+    const { status } = req.query;
 
-    const applications = await Application.find({ applicantId })
+    const filter = { applicantId };
+    const allowedStatuses = ["applied", "reviewed", "selected", "rejected"];
+
+    if (status && !allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid status filter"
+      });
+    }
+
+    if (status) {
+      filter.status = status;
+    }
+
+    const applications = await Application.find(filter)
       .populate("jobId", "title location type salaryRange")
-      .populate("resumeId", "skills summary")  // optional
+      .populate("resumeId", "skills summary")
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -85,7 +100,10 @@ export const getMyApplications = async (req, res) => {
     });
   } catch (error) {
     console.error("Get My Applications Error:", error);
-    res.status(500).json({ success: false, message: "Error while fetching applications" });
+    res.status(500).json({
+      success: false,
+      message: "Error while fetching applications"
+    });
   }
 };
 
@@ -161,6 +179,8 @@ export const updateApplicationStatus = async (req, res) => {
         message: "Invalid status value"
       });
     }
+
+    console.log(`applicationId -> ${applicationId}`);
 
     const application = await Application.findById(applicationId)
       .populate("jobId");
