@@ -1,5 +1,6 @@
 import express from "express";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import dotenv from "dotenv";
 dotenv.config(); 
 import connectDB from "./config/db.js";
@@ -14,7 +15,18 @@ import resumeRoutes from "./routes/resume_routes.js";
 const app = express();
 
 app.use(express.json());
+
+app.use(
+  cors({
+    origin: "http://localhost:5173", // frontend localhost URL
+    credentials: true,              
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
 app.use(cookieParser());
+
 
 connectDB();
 
