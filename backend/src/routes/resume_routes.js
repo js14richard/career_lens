@@ -27,7 +27,7 @@ router.post(
  * Get all resumes of logged-in applicant
  */
 router.get(
-  "/my-resumes",
+  "/me",
   auth,
   role("applicant"),
   getMyResumes

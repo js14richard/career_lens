@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 
 type Props = {
   children: ReactNode;
-  allowedRoles?: ("candidate" | "recruiter")[];
+  allowedRoles?: ("applicant" | "recruiter")[];
 };
 
 function ProtectedRoute({ children, allowedRoles }: Props) {

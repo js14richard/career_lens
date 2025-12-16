@@ -12,11 +12,12 @@ function Login() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // If already logged in, redirect away from login page
   useEffect(() => {
     if (isAuthenticated && role) {
       navigate(
-        role === "candidate"
-          ? "/candidate/dashboard"
+        role === "applicant"
+          ? "/applicant/dashboard"
           : "/recruiter/dashboard",
         { replace: true }
       );
@@ -34,20 +35,19 @@ function Login() {
         password,
       });
 
-      const backendRole = res.data.user.role;
-      const frontendRole =
-        backendRole === "applicant" ? "candidate" : "recruiter";
+      const role = res.data.user.role;
 
-      login(frontendRole);
+      // ✅ IMPORTANT: store token + role
+      login(res.data.token, role);
 
       navigate(
-        frontendRole === "candidate"
-          ? "/candidate/dashboard"
+        role === "applicant"
+          ? "/applicant/dashboard"
           : "/recruiter/dashboard"
       );
     } catch (err: any) {
       setError(
-        err.response?.data?.message || "Invalid credentials"
+        err?.response?.data?.message || "Invalid credentials"
       );
     } finally {
       setLoading(false);
@@ -59,7 +59,9 @@ function Login() {
       <div className="w-full max-w-md border rounded-lg p-6">
         <h1 className="text-2xl font-bold mb-6">Login</h1>
 
-        {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
+        {error && (
+          <p className="mb-4 text-sm text-red-600">{error}</p>
+        )}
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           <input
@@ -83,7 +85,7 @@ function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 rounded"
+            className="w-full bg-blue-600 text-white py-2 rounded disabled:opacity-50"
           >
             {loading ? "Logging in..." : "Login"}
           </button>

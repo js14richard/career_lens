@@ -9,8 +9,11 @@ import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 
 import ProtectedRoute from "../auth/ProtectedRoute";
-import CandidateDashboard from "../pages/candidate/Dashboard";
+import ApplicantDashboard from "../pages/applicant/Dashboard";
 import RecruiterDashboard from "../pages/recruiter/Dashboard";
+
+import PublicJobDetails from "../pages/jobs/PublicJobDetails";
+
 
 function AppRoutes() {
   return (
@@ -22,12 +25,15 @@ function AppRoutes() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        
+
+        <Route path="/jobs/:jobId" element={<PublicJobDetails />} />
+
+
         <Route
-          path="/candidate/dashboard"
+          path="/applicant/dashboard"
           element={
-            <ProtectedRoute allowedRoles={["candidate"]}>
-              <CandidateDashboard />
+            <ProtectedRoute allowedRoles={["applicant"]}>
+              <ApplicantDashboard />
             </ProtectedRoute>
           }
         />

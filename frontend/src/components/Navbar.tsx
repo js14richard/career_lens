@@ -36,9 +36,9 @@ function Navbar() {
           </>
         ) : (
           <>
-            {role === "candidate" && (
+            {role === "applicant" && (
               <Link
-                to="/candidate/dashboard"
+                to="/applicant/dashboard"
                 className="text-gray-700 hover:text-blue-600"
               >
                 Dashboard
