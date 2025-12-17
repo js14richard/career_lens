@@ -7,47 +7,46 @@ import Contact from "../pages/static/Contact";
 import NotFound from "../pages/static/NotFound";
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
-
+import RecruiterRoutes from "./RecruiterRoutes";
 import ProtectedRoute from "../auth/ProtectedRoute";
 import ApplicantDashboard from "../pages/applicant/Dashboard";
-import RecruiterDashboard from "../pages/recruiter/Dashboard";
 
 import PublicJobDetails from "../pages/jobs/PublicJobDetails";
-
 
 function AppRoutes() {
   return (
     <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/how-it-works" element={<HowItWorks />} />
-        <Route path="/features" element={<Features />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+      {/* PUBLIC */}
+      <Route path="/" element={<Home />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/how-it-works" element={<HowItWorks />} />
+      <Route path="/features" element={<Features />} />
+      <Route path="/contact" element={<Contact />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
-        <Route path="/jobs/:jobId" element={<PublicJobDetails />} />
+      <Route path="/jobs/:jobId" element={<PublicJobDetails />} />
 
+      {/* APPLICANT */}
+      <Route
+        path="/applicant"
+        element={<ProtectedRoute allowedRoles={["applicant"]} />}
+      >
+        <Route path="dashboard" element={<ApplicantDashboard />} />
+      </Route>
 
-        <Route
-          path="/applicant/dashboard"
+      {/* ✅ RECRUITER (FIXED) */}
+      <Route
+          path="/recruiter"
           element={
-            <ProtectedRoute allowedRoles={["applicant"]}>
-              <ApplicantDashboard />
-            </ProtectedRoute>
+            <ProtectedRoute allowedRoles={["recruiter"]} />
           }
-        />
+      >
+        <Route path="*" element={<RecruiterRoutes />} />
+      </Route>
 
-        <Route
-          path="/recruiter/dashboard"
-          element={
-            <ProtectedRoute allowedRoles={["recruiter"]}>
-              <RecruiterDashboard />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route path="*" element={<NotFound />} />
+      {/* FALLBACK */}
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

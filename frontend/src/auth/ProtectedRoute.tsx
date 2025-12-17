@@ -1,13 +1,11 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "./AuthContext";
-import type { ReactNode } from "react";
 
 type Props = {
-  children: ReactNode;
   allowedRoles?: ("applicant" | "recruiter")[];
 };
 
-function ProtectedRoute({ children, allowedRoles }: Props) {
+function ProtectedRoute({ allowedRoles }: Props) {
   const { isAuthenticated, role } = useAuth();
 
   console.log("Auth:", { isAuthenticated, role });
@@ -20,7 +18,8 @@ function ProtectedRoute({ children, allowedRoles }: Props) {
     return <Navigate to="/" replace />;
   }
 
-  return <>{children}</>;
+  // ✅ REQUIRED FOR NESTED ROUTES
+  return <Outlet />;
 }
 
 export default ProtectedRoute;
