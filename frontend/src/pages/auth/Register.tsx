@@ -12,6 +12,8 @@ function Register() {
     email: "",
     password: "",
     role: "applicant" as Role,
+    location: "",
+    headline:"",
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -96,6 +98,30 @@ function Register() {
               value={formData.password}
               onChange={handleChange}
               required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm mb-1">Location</label>
+            <input
+              name="location"
+              type="text"
+              className="w-full border rounded px-3 py-2"
+              placeholder="ex: Chennai, India"
+              value={formData.location}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm mb-1">Headline</label>
+            <input
+              name="headline"
+              type="text"
+              className="w-full border rounded px-3 py-2"
+              placeholder="ex: Tech Lead"
+              value={formData.headline}
+              onChange={handleChange}
             />
           </div>
 

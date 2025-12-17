@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import api from "../../../api/axios";
 
+/* =======================
+   TYPES
+======================= */
+
 type UserProfile = {
   name: string;
   profile: {
@@ -10,11 +14,25 @@ type UserProfile = {
   };
 };
 
+type WorkExperience = {
+  _id?: string;
+  company: string;
+  role: string;
+  startDate: string;
+  endDate: string;
+  description: string;
+};
+
 type ResumeAnalysis = {
   skills: string[];
   summary?: string;
   experienceYears?: number;
+  workExperience?: WorkExperience[];
 };
+
+/* =======================
+   COMPONENT
+======================= */
 
 function ProfileTab() {
   const resumeInputRef = useRef<HTMLInputElement | null>(null);
@@ -31,21 +49,22 @@ function ProfileTab() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
+  const hasResume = Boolean(resumeId && analysis);
+
   /* =======================
-     Fetch User
-  ======================== */
+     FETCH USER
+  ======================= */
   useEffect(() => {
     const fetchUser = async () => {
       const res = await api.get("/user/me");
       setUser(res.data.user);
     };
-
     fetchUser();
   }, []);
 
   /* =======================
-     Fetch Resume + Analysis
-  ======================== */
+     FETCH RESUME + ANALYSIS
+  ======================= */
   useEffect(() => {
     const fetchResume = async () => {
       try {
@@ -60,14 +79,15 @@ function ProfileTab() {
 
           if (latest.skills) {
             setAnalysis({
-              skills: latest.skills,
+              skills: latest.skills || [],
               summary: latest.summary,
               experienceYears: latest.experienceYears,
+              workExperience: latest.workExperience || [],
             });
           }
         }
       } catch {
-        // no resume
+        // no resume yet
       }
     };
 
@@ -80,8 +100,8 @@ function ProfileTab() {
   };
 
   /* =======================
-     Upload Profile Photo
-  ======================== */
+     UPLOAD PROFILE PHOTO
+  ======================= */
   const handlePhotoUpload = async (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -89,28 +109,23 @@ function ProfileTab() {
 
     const file = e.target.files[0];
     const formData = new FormData();
-
-    // MUST match backend
     formData.append("image", file);
 
     try {
       const res = await api.post("/user/upload-photo", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-
       setUser(res.data.user);
     } catch {
       setError("Failed to update profile picture");
     } finally {
-      if (photoInputRef.current) {
-        photoInputRef.current.value = "";
-      }
+      if (photoInputRef.current) photoInputRef.current.value = "";
     }
   };
 
   /* =======================
-     Upload + Auto Analyze Resume
-  ======================== */
+     UPLOAD + ANALYZE RESUME
+  ======================= */
   const handleResumeUpload = async () => {
     if (!resumeFile) {
       setError("Please select a resume file");
@@ -129,31 +144,29 @@ function ProfileTab() {
       setResumeUrl(uploadRes.data.fileUrl);
 
       const analyzeRes = await api.post("/resumes/analyze");
+
       setAnalysis({
-        skills: analyzeRes.data.data.skills,
+        skills: analyzeRes.data.data.skills || [],
         summary: analyzeRes.data.data.summary,
-        experienceYears:
-          analyzeRes.data.data.experienceYears,
+        experienceYears: analyzeRes.data.data.experienceYears,
+        workExperience: analyzeRes.data.data.workExperience || [],
       });
 
       setSuccess("Resume uploaded and analyzed successfully");
     } catch (err: any) {
       setError(
-        err?.response?.data?.message ||
-          "Resume upload failed"
+        err?.response?.data?.message || "Resume upload failed"
       );
     } finally {
       setLoading(false);
-      if (resumeInputRef.current) {
-        resumeInputRef.current.value = "";
-      }
+      if (resumeInputRef.current) resumeInputRef.current.value = "";
       setResumeFile(null);
     }
   };
 
   /* =======================
-     Delete Resume
-  ======================== */
+     DELETE RESUME
+  ======================= */
   const handleDeleteResume = async () => {
     if (!resumeId) return;
 
@@ -173,11 +186,12 @@ function ProfileTab() {
     }
   };
 
+  /* =======================
+     UI
+  ======================= */
   return (
     <div className="space-y-10">
-      {/* =======================
-          PROFILE HEADER
-      ======================== */}
+      {/* PROFILE HEADER */}
       <div className="flex items-center gap-5">
         <div className="relative">
           <img
@@ -205,18 +219,14 @@ function ProfileTab() {
         </div>
 
         <div>
-          <h2 className="text-xl font-semibold">
-            {user?.name}
-          </h2>
+          <h2 className="text-xl font-semibold">{user?.name}</h2>
 
-          {/* ✅ HEADLINE */}
           {user?.profile.headline && (
             <p className="text-gray-700">
               {user.profile.headline}
             </p>
           )}
 
-          {/* ✅ LOCATION */}
           {user?.profile.location && (
             <p className="text-sm text-gray-500">
               {user.profile.location}
@@ -225,18 +235,13 @@ function ProfileTab() {
         </div>
       </div>
 
-      {/* =======================
-          PROFILE INSIGHTS
-      ======================== */}
+      {/* PROFILE INSIGHTS */}
       <div className="border rounded-lg p-6">
-        <h3 className="font-semibold mb-3">
-          Profile Insights
-        </h3>
+        <h3 className="font-semibold mb-3">Profile Insights</h3>
 
         {!analysis && (
           <p className="text-gray-600">
-            Upload your resume to generate profile
-            insights.
+            Upload your resume to generate profile insights.
           </p>
         )}
 
@@ -247,8 +252,7 @@ function ProfileTab() {
             </p>
 
             <p className="text-sm text-gray-500 mb-4">
-              {analysis.experienceYears ?? 0} year(s)
-              experience
+              {analysis.experienceYears ?? 0} year(s) experience
             </p>
 
             <div className="flex flex-wrap gap-2">
@@ -265,29 +269,58 @@ function ProfileTab() {
         )}
       </div>
 
-      {/* =======================
-          RESUME SECTION
-      ======================== */}
+      {/* WORK EXPERIENCE */}
+      {analysis?.workExperience &&
+        analysis.workExperience.length > 0 && (
+          <div className="border rounded-lg p-6">
+            <h3 className="font-semibold mb-4">Work Experience</h3>
+
+            <div className="space-y-4">
+              {analysis.workExperience.map((exp) => (
+                <div key={exp._id} className="border rounded-md p-4">
+                  <div className="flex justify-between flex-wrap">
+                    <div>
+                      <h4 className="font-medium">{exp.role}</h4>
+                      <p className="text-sm text-gray-600">
+                        {exp.company}
+                      </p>
+                    </div>
+
+                    <p className="text-sm text-gray-500">
+                      {exp.startDate}
+                      {exp.endDate &&
+                        exp.endDate !== "Present" &&
+                        ` – ${exp.endDate}`}
+                    </p>
+                  </div>
+
+                  <p className="mt-2 text-sm text-gray-700">
+                    {exp.description}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+      {/* RESUME SECTION */}
       <div className="border rounded-lg p-6">
         <h3 className="font-semibold mb-3">Resume</h3>
 
         {error && (
-          <p className="mb-3 text-sm text-red-600">
-            {error}
-          </p>
+          <p className="mb-3 text-sm text-red-600">{error}</p>
         )}
         {success && (
-          <p className="mb-3 text-sm text-green-600">
-            {success}
-          </p>
+          <p className="mb-3 text-sm text-green-600">{success}</p>
         )}
 
-        {!resumeId && (
+        {/* UPLOAD (ONLY WHEN NO RESUME) */}
+        {!hasResume && (
           <>
             <input
               ref={resumeInputRef}
               type="file"
-              accept=".pdf,.doc,.docx"
+              accept=".doc,.docx"
               onChange={(e) =>
                 setResumeFile(e.target.files?.[0] || null)
               }
@@ -304,23 +337,22 @@ function ProfileTab() {
           </>
         )}
 
-        {resumeId && (
+        {/* VIEW / DELETE (AFTER UPLOAD + PARSE) */}
+        {hasResume && (
           <div className="space-y-3">
-            {resumeUrl && (
-              <a
-                href={resumeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 text-sm underline"
-              >
-                View Resume
-              </a>
-            )}
+           {resumeUrl && (
+            <button
+              onClick={() => window.open(resumeUrl, "_blank", "noopener,noreferrer")}
+              className="bg-gray-100 text-blue-600 px-4 py-2 rounded hover:bg-gray-200 text-sm"
+            >
+              View Resume
+            </button>
+          )}
 
             <button
               onClick={handleDeleteResume}
               disabled={loading}
-              className="bg-red-600 text-white px-4 py-2 rounded disabled:opacity-50"
+              className="bg-red-600 text-white ml-5 py-2 px-3 rounded disabled:opacity-50"
             >
               Delete Resume
             </button>

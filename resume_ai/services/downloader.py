@@ -11,6 +11,7 @@ def download_file_from_url(file_url: str) -> str:
         raise Exception("Invalid URL provided")
 
     response = requests.get(file_url, stream=True)
+    print(response)
     if response.status_code != 200:
         raise Exception(f"Failed to download file. HTTP {response.status_code}")
 

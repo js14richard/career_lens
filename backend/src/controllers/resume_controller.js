@@ -1,18 +1,13 @@
 import Resume from "../models/Resume.js";
-import { uploadResumeToCloudinary, generateSignedResumeUrl } from "../services/cloudinaryUpload.js";
+import {
+  uploadResumeToCloudinary,
+} from "../services/cloudinaryUpload.js";
 import cloudinary from "cloudinary";
 import { extractResumeText } from "../services/resumeParser.js";
 import { extractResumeInsights } from "../services/resumeAIService.js";
 
-
-
 /**
  * Upload Resume (Applicant Only)
- * 1) Upload to Cloudinary
- * 2) Create initial resume record
- * 3) Call Python FastAPI to extract text
- * 4) Send signed URL to Python for text extraction 
- * 5) Update resume with parsed text
  */
 export const uploadResume = async (req, res) => {
   try {
@@ -38,14 +33,12 @@ export const uploadResume = async (req, res) => {
       parseStatus: "pending"
     });
 
-    const signedUrl = generateSignedResumeUrl(publicId);
-    console.log(`signedUrl--- siril ${signedUrl}`);
-    let parsed = null;
+
+    let parsed;
     try {
-      parsed = await extractResumeText(signedUrl);
+      parsed = await extractResumeText(resume.fileUrl);
     } catch (error) {
       console.error("Python parse error:", error);
-
       resume.parseStatus = "failed";
       await resume.save();
 
@@ -67,7 +60,6 @@ export const uploadResume = async (req, res) => {
       message: "Resume uploaded and parsed successfully",
       resume
     });
-
   } catch (error) {
     console.error("Resume upload error:", error);
     res.status(500).json({
@@ -77,7 +69,6 @@ export const uploadResume = async (req, res) => {
     });
   }
 };
-
 
 /**
  * Get My Resumes
@@ -97,7 +88,6 @@ export const getMyResumes = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch resumes", error: error.message });
   }
 };
-
 
 /**
  * Delete Resume
@@ -129,11 +119,12 @@ export const deleteResume = async (req, res) => {
 };
 
 /**
- * 1. Fetch user's resume
- * 2. Call AI service
- * 3. Update resume with AI output
+ * Analyze Resume using AI
+ * 1. Fetch resume
+ * 2. Call AI
+ * 3. Normalize AI output
+ * 4. Save into Resume schema
  */
-
 export const analyzeResume = async (req, res) => {
   try {
     const resume = await Resume.findOne({ userId: req.user._id });
@@ -152,6 +143,7 @@ export const analyzeResume = async (req, res) => {
       });
     }
 
+    // Prevent re-analysis
     if (resume.skills.length > 0) {
       return res.status(200).json({
         success: true,
@@ -159,16 +151,29 @@ export const analyzeResume = async (req, res) => {
         data: {
           skills: resume.skills,
           experienceYears: resume.experienceYears,
-          summary: resume.summary
+          summary: resume.summary,
+          workExperience: resume.workExperience
         }
       });
     }
 
+    // 1. Call AI
     const aiResult = await extractResumeInsights(resume.textContent);
 
-    resume.skills = aiResult.skills;
-    resume.experienceYears = aiResult.experienceYears;
-    resume.summary = aiResult.summary;
+    // 2. Map AI → Schema
+    resume.skills = aiResult.skills || [];
+    resume.experienceYears = aiResult.experienceYears || 0;
+    resume.summary = aiResult.summary || "";
+
+    resume.workExperience = Array.isArray(aiResult.workExperience)
+      ? aiResult.workExperience.map((exp) => ({
+          company: exp.company || "",
+          role: exp.designation || "",
+          startDate: extractStartDate(exp.duration),
+          endDate: extractEndDate(exp.duration),
+          description: exp.summary || ""
+        }))
+      : [];
 
     await resume.save();
 
@@ -178,10 +183,10 @@ export const analyzeResume = async (req, res) => {
       data: {
         skills: resume.skills,
         experienceYears: resume.experienceYears,
-        summary: resume.summary
+        summary: resume.summary,
+        workExperience: resume.workExperience
       }
     });
-
   } catch (error) {
     console.error("Analyze Resume Error:", error);
     res.status(500).json({
@@ -190,3 +195,15 @@ export const analyzeResume = async (req, res) => {
     });
   }
 };
+
+/* ---------------- HELPERS ---------------- */
+
+function extractStartDate(duration = "") {
+  if (!duration) return "";
+  return duration.split("–")[0]?.trim() || "";
+}
+
+function extractEndDate(duration = "") {
+  if (!duration) return "";
+  return duration.split("–")[1]?.trim() || "Present";
+}

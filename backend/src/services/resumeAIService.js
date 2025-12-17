@@ -8,71 +8,73 @@ export const extractResumeInsights = async (resumeText) => {
   try {
     const prompt = `
     You are an AI that extracts structured information from resumes.
-    
+      
     From the resume text below, extract:
-    1. A list of technical skills
+      
+    1. Technical skills
     2. Total years of professional experience (number only)
-    3. A short professional summary (2–3 lines)
-    
-    Return ONLY valid JSON in this exact format:
+    3. Short professional summary (2–3 lines)
+    4. Work experience details:
+       - Company
+       - Designation
+       - Duration (e.g., "Jan 2022 – Mar 2024")
+       - Short responsibility summary (1–2 lines)
+      
+    Return ONLY valid JSON in this format:
     {
       "skills": [],
       "experienceYears": 0,
-      "summary": ""
+      "summary": "",
+      "workExperience": [
+        {
+          "company": "",
+          "designation": "",
+          "duration": "",
+          "summary": ""
+        }
+      ]
     }
-    
+      
     Resume Text:
     """
     ${resumeText}
     """
-    
-    IMPORTANT RULES:
+      
+    IMPORTANT:
     - Output ONLY raw JSON
-    - Do NOT wrap the response in \`\`\` or \`\`\`json
-    - Do NOT include any explanation or extra text
-    - The response must be directly parseable by JSON.parse()
+    - No explanations
+    - No markdown
+    - Must be JSON.parse() safe
     `;
 
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
+      temperature: 0.2,
       messages: [
         { role: "system", content: "You extract structured resume data." },
         { role: "user", content: prompt }
-      ],
-      temperature: 0.2
+      ]
     });
 
-    const content = response.choices[0].message.content;
-
-    const cleanedResponse = cleanAIJson(content);
+    const raw = response.choices[0].message.content;
+    const cleaned = cleanAIJson(raw);
 
     let parsed;
     try {
-      parsed = JSON.parse(cleanedResponse);
-    } catch (error) {
-      console.error("❌ RAW AI RESPONSE:\n", content);
-      console.error("❌ CLEANED AI RESPONSE:\n", cleanedResponse);
-      throw new Error("AI returned invalid JSON");
+      parsed = JSON.parse(cleaned);
+    } catch (err) {
+      console.error("❌ RAW AI RESPONSE:", raw);
+      throw new Error("Invalid AI JSON response");
     }
 
-    return {
-      skills: parsed.skills || [],
-      experienceYears: parsed.experienceYears || 0,
-      summary: parsed.summary || ""
-    };
-
+    return parsed;
   } catch (error) {
     console.error("Resume AI Extraction Error:", error);
-    throw new Error("Failed to extract resume insights using AI");
+    throw new Error("Failed to extract resume insights");
   }
 };
 
-
 function cleanAIJson(text) {
   if (!text || typeof text !== "string") return "";
-
-  return text
-    .replace(/```json/gi, "")
-    .replace(/```/g, "")
-    .trim();
+  return text.replace(/```json/gi, "").replace(/```/g, "").trim();
 }

@@ -7,9 +7,9 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-/**
- * Upload Profile Image
- */
+/* ============================
+   Upload Profile Image
+============================ */
 export const uploadProfileImageToCloudinary = async (filePath) => {
   try {
     const result = await cloudinary.uploader.upload(filePath, {
@@ -19,34 +19,6 @@ export const uploadProfileImageToCloudinary = async (filePath) => {
       ]
     });
 
-    fs.unlinkSync(filePath); // Remove temp file
-
-    return {
-      url: result.secure_url,
-      publicId: result.public_id
-    };
-  } catch (error) {
-    console.error("Cloudinary Profile Upload Error:", error);
-
-    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-
-    throw new Error("Profile image upload failed");
-  }
-};
-
-
-
-/**
- * Upload Resume (PDF/DOCX)
- */
-export const uploadResumeToCloudinary = async (filePath) => {
-  try {
-    const result = await cloudinary.uploader.upload(filePath, {
-      folder: process.env.CLOUDINARY_RESUME_FOLDER,
-      resource_type: "raw",
-      type: "authenticated"
-    });
-
     fs.unlinkSync(filePath);
 
     return {
@@ -54,20 +26,32 @@ export const uploadResumeToCloudinary = async (filePath) => {
       publicId: result.public_id
     };
   } catch (error) {
-    console.error("Cloudinary Resume Upload Error:", error);
-
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-
-    throw new Error("Resume upload failed");
+    throw new Error("Profile image upload failed");
   }
 };
 
+/* ============================
+   Upload Resume (PDF / DOCX)
+============================ */
+export const uploadResumeToCloudinary = async (filePath) => {
+  try {
+    const result = await cloudinary.uploader.upload(filePath, {
+      resource_type: "raw",                 // ✅ REQUIRED
+      folder: process.env.CLOUDINARY_RESUME_FOLDER,
+      use_filename: true,
+      unique_filename: true,
+      type: "upload"                        // ✅ MUST be public
+    });
 
-export const generateSignedResumeUrl = (publicId) => {
-  return cloudinary.url(publicId, {
-    resource_type: "raw",
-    type: "authenticated",
-    sign_url: true,
-    expires_at: Math.floor(Date.now() / 1000) + 300 // 5 minutes
-  });
+    fs.unlinkSync(filePath);
+
+    return {
+      url: result.secure_url,               // ✅ USE THIS
+      publicId: result.public_id
+    };
+  } catch (error) {
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    throw new Error("Resume upload failed");
+  }
 };

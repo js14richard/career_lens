@@ -3,6 +3,7 @@ import axios from "axios";
 const PYTHON_API_URL = process.env.AI_PARSER_URL;
 
 export const extractResumeText = async (fileUrl) => {
+  console.log(fileUrl);
   try {
     const response = await axios.post(`${PYTHON_API_URL}/extract-text`, {
       file_url: fileUrl
