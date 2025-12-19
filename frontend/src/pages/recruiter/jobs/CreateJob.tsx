@@ -12,6 +12,8 @@ function CreateJob() {
   const [type, setType] = useState("full-time");
   const [location, setLocation] = useState("");
   const [isRemoteJob, setIsRemoteJob] = useState(false);
+  const [minSalary, setMinSalary] = useState<number>(0);
+  const [maxSalary, setMaxSalary] = useState<number>(0);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -19,11 +21,22 @@ function CreateJob() {
   /* =======================
      SUBMIT HANDLER
   ======================= */
-  const handleSubmit = async (
-    e: React.FormEvent
-  ) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    // ✅ SALARY VALIDATION
+    if (
+      minSalary > 0 &&
+      maxSalary > 0 &&
+      minSalary > maxSalary
+    ) {
+      setError(
+        "Minimum salary cannot be greater than maximum salary"
+      );
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -38,6 +51,8 @@ function CreateJob() {
         type,
         location,
         isRemoteJob,
+        minSalary,
+        maxSalary,
       });
 
       navigate("/recruiter/dashboard/jobs");
@@ -58,7 +73,9 @@ function CreateJob() {
       </h2>
 
       {error && (
-        <p className="text-red-600 text-sm">{error}</p>
+        <p className="text-red-600 text-sm">
+          {error}
+        </p>
       )}
 
       <form
@@ -73,7 +90,9 @@ function CreateJob() {
           <input
             type="text"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) =>
+              setTitle(e.target.value)
+            }
             required
             className="w-full border rounded p-2"
           />
@@ -103,7 +122,9 @@ function CreateJob() {
           <input
             type="text"
             value={skills}
-            onChange={(e) => setSkills(e.target.value)}
+            onChange={(e) =>
+              setSkills(e.target.value)
+            }
             placeholder="React, Node.js, MongoDB"
             className="w-full border rounded p-2"
           />
@@ -118,7 +139,9 @@ function CreateJob() {
             type="number"
             value={experience}
             onChange={(e) =>
-              setExperience(Number(e.target.value))
+              setExperience(
+                Number(e.target.value)
+              )
             }
             min={0}
             className="w-full border rounded p-2"
@@ -132,7 +155,9 @@ function CreateJob() {
           </label>
           <select
             value={type}
-            onChange={(e) => setType(e.target.value)}
+            onChange={(e) =>
+              setType(e.target.value)
+            }
             className="w-full border rounded p-2"
           >
             <option value="full-time">
@@ -168,7 +193,9 @@ function CreateJob() {
             type="checkbox"
             checked={isRemoteJob}
             onChange={(e) =>
-              setIsRemoteJob(e.target.checked)
+              setIsRemoteJob(
+                e.target.checked
+              )
             }
           />
           <label className="text-sm">
@@ -176,20 +203,61 @@ function CreateJob() {
           </label>
         </div>
 
+        {/* SALARY RANGE */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium">
+              Min Salary
+            </label>
+            <input
+              type="number"
+              value={minSalary}
+              onChange={(e) =>
+                setMinSalary(
+                  Number(e.target.value)
+                )
+              }
+              min={0}
+              className="w-full border rounded p-2"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium">
+              Max Salary
+            </label>
+            <input
+              type="number"
+              value={maxSalary}
+              onChange={(e) =>
+                setMaxSalary(
+                  Number(e.target.value)
+                )
+              }
+              min={0}
+              className="w-full border rounded p-2"
+            />
+          </div>
+        </div>
+
         {/* ACTIONS */}
-        <div className="flex gap-3">
+        <div className="flex gap-3 pt-2">
           <button
             type="submit"
             disabled={loading}
             className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
           >
-            {loading ? "Creating..." : "Create Job"}
+            {loading
+              ? "Creating..."
+              : "Create Job"}
           </button>
 
           <button
             type="button"
             onClick={() =>
-              navigate("/recruiter/dashboard/jobs")
+              navigate(
+                "/recruiter/dashboard/jobs"
+              )
             }
             className="border px-4 py-2 rounded"
           >
