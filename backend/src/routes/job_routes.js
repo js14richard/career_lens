@@ -17,7 +17,7 @@ const router = express.Router();
  */
 router.post("/create", auth, role("recruiter"), createJob);
 
-router.put("/:id/update", auth, role("recruiter"), updateJob);
+router.patch("/:id/update", auth, role("recruiter"), updateJob);
 
 router.delete("/:id/delete", auth, role("recruiter"), deleteJob);
 

@@ -1,12 +1,8 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import api from "../../../api/axios";
 
-/* =======================
-   TYPES
-======================= */
 type Job = {
-  _id: string;
   title: string;
   description: string;
   skills: string[];
@@ -16,27 +12,24 @@ type Job = {
   isRemoteJob: boolean;
   salaryMin?: number;
   salaryMax?: number;
-  salaryCurrency?: string;
-  createdAt: string;
 };
 
-function JobDetails() {
+function EditJob() {
   const { jobId } = useParams<{ jobId: string }>();
+  const navigate = useNavigate();
 
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  /* =======================
-     FETCH JOB DETAILS
-  ======================= */
   useEffect(() => {
     const fetchJob = async () => {
       try {
         const res = await api.get(`/jobs/${jobId}`);
         setJob(res.data.job);
       } catch {
-        setError("Failed to load job details");
+        setError("Failed to load job");
       } finally {
         setLoading(false);
       }
@@ -45,142 +38,188 @@ function JobDetails() {
     if (jobId) fetchJob();
   }, [jobId]);
 
-  /* =======================
-     UI STATES
-  ======================= */
-  if (loading) {
-    return (
-      <p className="text-gray-500">
-        Loading job details...
-      </p>
-    );
-  }
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    if (!job) return;
 
-  if (error || !job) {
-    return (
-      <p className="text-red-600">
-        {error || "Job not found"}
-      </p>
-    );
-  }
+    const { name, value, type, checked } = e.target as HTMLInputElement;
 
-  /* =======================
-     SALARY FORMATTER
-  ======================= */
-  const getSalaryText = () => {
-    const currency = job.salaryCurrency || "INR";
-
-    if (job.salaryMin && job.salaryMax) {
-      return `${job.salaryMin} - ${job.salaryMax} ${currency}`;
-    }
-
-    if (job.salaryMin) {
-      return `From ${job.salaryMin} ${currency}`;
-    }
-
-    if (job.salaryMax) {
-      return `Up to ${job.salaryMax} ${currency}`;
-    }
-
-    return "Not disclosed";
+    setJob({
+      ...job,
+      [name]:
+        type === "checkbox"
+          ? checked
+          : name === "experience" ||
+            name === "salaryMin" ||
+            name === "salaryMax"
+          ? Number(value)
+          : value,
+    });
   };
 
-  /* =======================
-     UI
-  ======================= */
+  const handleSkillsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!job) return;
+    setJob({
+      ...job,
+      skills: e.target.value.split(",").map((s) => s.trim()),
+    });
+  };
+
+  const handleSubmit = async () => {
+  if (!jobId || !job) return;
+
+  try {
+    setSaving(true);
+    await api.patch(`/jobs/${jobId}/update`, job);
+    navigate(`/recruiter/dashboard/jobs/${jobId}`);
+  } catch {
+    setError("Failed to update job");
+  } finally {
+    setSaving(false);
+  }
+};
+
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p className="text-red-600">{error}</p>;
+  if (!job) return <p>Job not found</p>;
+
   return (
-    <div className="space-y-6">
-      {/* HEADER */}
-      <div className="flex justify-between items-start">
-        <div>
-          <h2 className="text-xl font-semibold">
-            {job.title}
-          </h2>
-          <p className="text-gray-600 text-sm">
-            {job.location} • {job.type} •{" "}
-            {job.experience}+ yrs
-          </p>
-        </div>
+    <div className="space-y-5 max-w-3xl">
+      <h2 className="text-xl font-semibold">Edit Job</h2>
 
-        <Link
-          to="/recruiter/dashboard"
-          className="text-sm text-blue-600 underline"
+      {/* Job Title */}
+      <div>
+        <label className="text-sm font-medium">Job Title</label>
+        <input
+          name="title"
+          className="border p-2 w-full"
+          value={job.title}
+          onChange={handleChange}
+        />
+      </div>
+
+      {/* Description */}
+      <div>
+        <label className="text-sm font-medium">Description</label>
+        <textarea
+          name="description"
+          rows={5}
+          className="border p-2 w-full"
+          value={job.description}
+          onChange={handleChange}
+        />
+      </div>
+
+      {/* Skills */}
+      <div>
+        <label className="text-sm font-medium">
+          Skills (comma separated)
+        </label>
+        <input
+          className="border p-2 w-full"
+          value={job.skills.join(", ")}
+          onChange={handleSkillsChange}
+        />
+      </div>
+
+      {/* Location */}
+      <div>
+        <label className="text-sm font-medium">Location</label>
+        <input
+          name="location"
+          className="border p-2 w-full"
+          value={job.location}
+          onChange={handleChange}
+        />
+      </div>
+
+      {/* Job Type */}
+      <div>
+        <label className="text-sm font-medium">Job Type</label>
+        <select
+          name="type"
+          className="border p-2 w-full"
+          value={job.type}
+          onChange={handleChange}
         >
-          Back to Jobs
-        </Link>
+          <option value="Full-time">Full-time</option>
+          <option value="Part-time">Part-time</option>
+          <option value="Contract">Contract</option>
+          <option value="Internship">Internship</option>
+        </select>
       </div>
 
-      {/* DESCRIPTION */}
+      {/* Experience */}
       <div>
-        <h3 className="font-medium mb-1">
-          Job Description
-        </h3>
-        <p className="text-gray-700 whitespace-pre-line">
-          {job.description}
-        </p>
+        <label className="text-sm font-medium">
+          Experience (years)
+        </label>
+        <input
+          type="number"
+          name="experience"
+          className="border p-2 w-full"
+          value={job.experience}
+          onChange={handleChange}
+        />
       </div>
 
-      {/* SKILLS */}
-      <div>
-        <h3 className="font-medium mb-2">
-          Required Skills
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          {job.skills.map((skill) => (
-            <span
-              key={skill}
-              className="bg-blue-100 text-blue-700 text-sm px-2 py-1 rounded"
-            >
-              {skill}
-            </span>
-          ))}
+      {/* Remote */}
+      <div className="flex items-center gap-2">
+        <input
+          type="checkbox"
+          name="isRemoteJob"
+          checked={job.isRemoteJob}
+          onChange={handleChange}
+        />
+        <label className="text-sm font-medium">Remote Job</label>
+      </div>
+
+      {/* Salary */}
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="text-sm font-medium">Salary Min</label>
+          <input
+            type="number"
+            name="salaryMin"
+            className="border p-2 w-full"
+            value={job.salaryMin || ""}
+            onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label className="text-sm font-medium">Salary Max</label>
+          <input
+            type="number"
+            name="salaryMax"
+            className="border p-2 w-full"
+            value={job.salaryMax || ""}
+            onChange={handleChange}
+          />
         </div>
       </div>
 
-      {/* JOB META */}
-      <div className="grid grid-cols-2 gap-4 text-sm text-gray-700">
-        <p>
-          <span className="font-medium">
-            Remote:
-          </span>{" "}
-          {job.isRemoteJob ? "Yes" : "No"}
-        </p>
-
-        <p>
-          <span className="font-medium">
-            Salary:
-          </span>{" "}
-          {getSalaryText()}
-        </p>
-
-        <p>
-          <span className="font-medium">
-            Posted on:
-          </span>{" "}
-          {new Date(
-            job.createdAt
-          ).toLocaleDateString()}
-        </p>
-      </div>
-
-      {/* ACTIONS */}
+      {/* Actions */}
       <div className="flex gap-3 pt-4 border-t">
-        <Link
-          to={`/recruiter/dashboard/jobs/${job._id}/edit`}
+        <button
+          onClick={handleSubmit}
+          disabled={saving}
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
         >
-          Edit Job
-        </Link>
-          
-        <button
-          disabled
-          className="bg-gray-300 text-gray-700 px-4 py-2 rounded cursor-not-allowed"
-        >
-          View Applicants (next)
+          {saving ? "Saving..." : "Save Changes"}
         </button>
+
+        <Link
+          to={`/recruiter/dashboard/jobs/${jobId}`}
+          className="bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300"
+        >
+          Back to Job Details
+        </Link>
       </div>
     </div>
   );
 }
 
-export default JobDetails;
+export default EditJob;
