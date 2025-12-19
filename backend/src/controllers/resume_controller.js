@@ -89,6 +89,36 @@ export const getMyResumes = async (req, res) => {
   }
 };
 
+
+/**
+ * Get Resumes By ID
+ */
+
+export const getResumeById = async (req, res) => {
+  try {
+    const { resumeId } = req.params;
+
+    const resume = await Resume.findById(resumeId);
+
+    if (!resume) {
+      return res.status(404).json({
+        success: false,
+        message: "Resume not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      resume,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch resume",
+    });
+  }
+};
+
 /**
  * Delete Resume
  */

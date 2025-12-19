@@ -6,7 +6,8 @@ import {
   uploadResume,
   getMyResumes,
   deleteResume,
-  analyzeResume
+  analyzeResume, 
+  getResumeById,
 } from "../controllers/resume_controller.js";
 
 
@@ -31,6 +32,16 @@ router.get(
   auth,
   role("applicant"),
   getMyResumes
+);
+
+/**
+ * Get all resumes of logged-in applicant
+ */
+router.get(
+  "/:resumeId",
+  auth,
+  role("recruiter"),
+  getResumeById
 );
 
 /**

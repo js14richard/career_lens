@@ -118,12 +118,12 @@ function JobDetails() {
           Edit Job
         </Link>
 
-        <button
-          disabled
-          className="bg-gray-300 text-gray-700 px-4 py-2 rounded cursor-not-allowed"
+        <Link
+          to={`/recruiter/dashboard/jobs/${job._id}/applicants`}
+          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
         >
-          View Applicants (next)
-        </button>
+          View Applicants
+        </Link>
       </div>
     </div>
   );

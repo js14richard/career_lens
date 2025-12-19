@@ -4,6 +4,8 @@ import JobList from "../pages/recruiter/jobs/JobList";
 import CreateJob from "../pages/recruiter/jobs/CreateJob";
 import JobDetails from "../pages/recruiter/jobs/JobDetails";
 import EditJob from "../pages/recruiter/jobs/EditJob";
+import ViewApplicants from "../pages/recruiter/jobs/ViewApplicants";
+import ApplicantProfile from "../pages/recruiter/applicants/ApplicantProfile";
 
 
 function RecruiterRoutes() {
@@ -18,10 +20,15 @@ function RecruiterRoutes() {
         <Route path="jobs/create" element={<CreateJob />} />
         <Route path="jobs/:jobId" element={<JobDetails />} />
         <Route path="jobs/:jobId/edit" element={<EditJob />} />
+        <Route path="jobs/:jobId/applicants" element={<ViewApplicants />} />
+        <Route path="applicants/:applicantId" element={<ApplicantProfile />}/>
       </Route>
 
       {/* SAFETY */}
-      <Route path="*" element={<Navigate to="dashboard" />} />
+      <Route
+        path="*"
+        element={<Navigate to="/recruiter/dashboard" replace />}
+      />
     </Routes>
   );
 }

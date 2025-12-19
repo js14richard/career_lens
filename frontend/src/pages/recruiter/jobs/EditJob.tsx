@@ -19,15 +19,19 @@ function EditJob() {
   const navigate = useNavigate();
 
   const [job, setJob] = useState<Job | null>(null);
+  const [originalJob, setOriginalJob] = useState<Job | null>(null);
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   useEffect(() => {
     const fetchJob = async () => {
       try {
         const res = await api.get(`/jobs/${jobId}`);
         setJob(res.data.job);
+        setOriginalJob(res.data.job); // snapshot for comparison
       } catch {
         setError("Failed to load job");
       } finally {
@@ -68,19 +72,31 @@ function EditJob() {
     });
   };
 
-  const handleSubmit = async () => {
-  if (!jobId || !job) return;
+  const isDirty =
+    JSON.stringify(job) !== JSON.stringify(originalJob);
 
-  try {
-    setSaving(true);
-    await api.patch(`/jobs/${jobId}/update`, job);
-    navigate(`/recruiter/dashboard/jobs/${jobId}`);
-  } catch {
-    setError("Failed to update job");
-  } finally {
-    setSaving(false);
-  }
-};
+  const handleSubmit = async () => {
+    if (!jobId || !job || !isDirty) return;
+
+    try {
+      setSaving(true);
+      setError("");
+      await api.patch(`/jobs/${jobId}/update`, job);
+
+      setSuccessMessage("Job updated successfully");
+
+      setOriginalJob(job); // reset dirty state
+
+      setTimeout(() => {
+        setSuccessMessage("");
+        navigate(`/recruiter/dashboard/jobs/${jobId}`);
+      }, 1500);
+    } catch {
+      setError("Failed to update job");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p className="text-red-600">{error}</p>;
@@ -89,6 +105,13 @@ function EditJob() {
   return (
     <div className="space-y-5 max-w-3xl">
       <h2 className="text-xl font-semibold">Edit Job</h2>
+
+      {/* Success Toast */}
+      {successMessage && (
+        <div className="bg-green-100 text-green-800 px-4 py-2 rounded">
+          {successMessage}
+        </div>
+      )}
 
       {/* Job Title */}
       <div>
@@ -205,8 +228,12 @@ function EditJob() {
       <div className="flex gap-3 pt-4 border-t">
         <button
           onClick={handleSubmit}
-          disabled={saving}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          disabled={saving || !isDirty}
+          className={`px-4 py-2 rounded text-white ${
+            saving || !isDirty
+              ? "bg-gray-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700"
+          }`}
         >
           {saving ? "Saving..." : "Save Changes"}
         </button>
