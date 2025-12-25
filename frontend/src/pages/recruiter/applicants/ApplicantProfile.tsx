@@ -24,6 +24,7 @@ function ApplicantProfile() {
 
   const [resume, setResume] = useState<Resume | null>(null);
   const [loadingResume, setLoadingResume] = useState(true);
+  const [status, setStatus] = useState<string>(app?.status);
 
   useEffect(() => {
     const fetchResume = async () => {
@@ -50,6 +51,27 @@ function ApplicantProfile() {
   }
 
   const profile = app.applicantId.profile;
+  const isFinalized = status === "shortlisted" || status === "rejected";
+
+  const updateStatus = async (
+    newStatus: "shortlisted" | "rejected"
+  ) => {
+    try {
+      await api.patch(`/applications/${app._id}/status`, {
+        status: newStatus,
+      });
+      setStatus(newStatus);
+    } catch (err) {
+      console.error("Failed to update status", err);
+    }
+  };
+
+  const statusBadgeClass =
+    status === "shortlisted"
+      ? "bg-green-100 text-green-700 border-green-300"
+      : status === "rejected"
+      ? "bg-red-100 text-red-700 border-red-300"
+      : "bg-yellow-100 text-yellow-700 border-yellow-300";
 
   return (
     <div className="space-y-8 max-w-4xl">
@@ -72,9 +94,35 @@ function ApplicantProfile() {
             Download Resume
           </a>
         )}
+
+        {/* STATUS BADGE */}
+        <span
+          className={`ml-auto border px-3 py-1 rounded-full text-xs font-medium ${statusBadgeClass}`}
+        >
+          {status?.toUpperCase()}
+        </span>
       </div>
 
       <h2 className="text-xl font-semibold">Applicant Profile</h2>
+
+      {/* ================= SELECT / REJECT ACTIONS ================= */}
+      {!isFinalized && (
+        <div className="flex gap-3">
+          <button
+            onClick={() => updateStatus("shortlisted")}
+            className="bg-green-600 text-white px-4 py-2 rounded text-sm hover:bg-green-700"
+          >
+            Select
+          </button>
+
+          <button
+            onClick={() => updateStatus("rejected")}
+            className="bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700"
+          >
+            Reject
+          </button>
+        </div>
+      )}
 
       {/* ================= BASIC INFO ================= */}
       <div className="flex items-center gap-4">
@@ -87,9 +135,15 @@ function ApplicantProfile() {
         )}
 
         <div>
-          <p className="text-lg font-medium">{app.applicantId.name}</p>
-          <p className="text-sm text-gray-600">{profile?.headline}</p>
-          <p className="text-sm text-gray-500">{profile?.location}</p>
+          <p className="text-lg font-medium">
+            {app.applicantId.name}
+          </p>
+          <p className="text-sm text-gray-600">
+            {profile?.headline}
+          </p>
+          <p className="text-sm text-gray-500">
+            {profile?.location}
+          </p>
         </div>
       </div>
 
@@ -117,10 +171,11 @@ function ApplicantProfile() {
         </p>
 
         {app.analysis?.summary && (
-          <p className="text-sm text-gray-700">{app.analysis.summary}</p>
+          <p className="text-sm text-gray-700">
+            {app.analysis.summary}
+          </p>
         )}
 
-        {/* ❌ MISSING SKILLS AS RED TAGS */}
         {app.analysis?.missingSkills?.length > 0 && (
           <div>
             <p className="text-sm font-medium mb-2 text-red-600">
@@ -151,17 +206,20 @@ function ApplicantProfile() {
         ) : resume ? (
           <>
             {resume.summary && (
-              <p className="text-sm text-gray-700">{resume.summary}</p>
+              <p className="text-sm text-gray-700">
+                {resume.summary}
+              </p>
             )}
 
             {resume.experienceYears !== undefined && (
               <p className="text-sm">
-                <span className="font-medium">Total Experience:</span>{" "}
+                <span className="font-medium">
+                  Total Experience:
+                </span>{" "}
                 {resume.experienceYears} years
               </p>
             )}
 
-            {/* ✅ CURRENT SKILLS (GREEN TAGS) */}
             {resume.skills?.length > 0 && (
               <div>
                 <p className="text-sm font-medium mb-2">
@@ -180,10 +238,11 @@ function ApplicantProfile() {
               </div>
             )}
 
-            {/* WORK EXPERIENCE */}
             {resume.workExperience?.length > 0 && (
               <div className="space-y-3">
-                <p className="text-sm font-medium">Work Experience</p>
+                <p className="text-sm font-medium">
+                  Work Experience
+                </p>
 
                 {resume.workExperience.map((exp) => (
                   <div

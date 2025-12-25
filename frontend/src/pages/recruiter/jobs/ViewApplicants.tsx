@@ -13,8 +13,8 @@ type Applicant = {
     _id: string;
     name: string;
     profile: {
-        headline: string;
-    }
+      headline: string;
+    };
   };
 };
 
@@ -24,6 +24,7 @@ function ViewApplicants() {
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [minMatchScore, setMinMatchScore] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchApplicants = async () => {
@@ -43,6 +44,22 @@ function ViewApplicants() {
     if (jobId) fetchApplicants();
   }, [jobId]);
 
+  const filteredApplicants = applicants.filter((app) => {
+    if (minMatchScore === null) return true;
+    return (app.analysis?.matchScore ?? 0) >= minMatchScore;
+  });
+
+  const getStatusBadgeClass = (status: string) => {
+    switch (status) {
+      case "shortlisted":
+        return "bg-green-100 text-green-700 border-green-300";
+      case "rejected":
+        return "bg-red-100 text-red-700 border-red-300";
+      default:
+        return "bg-yellow-100 text-yellow-700 border-yellow-300";
+    }
+  };
+
   if (loading) return <p>Loading applicants...</p>;
   if (error) return <p className="text-red-600">{error}</p>;
 
@@ -60,20 +77,55 @@ function ViewApplicants() {
         </Link>
       </div>
 
-      {/* Empty state */}
-      {applicants.length === 0 ? (
-        <p className="text-gray-500">No applicants yet.</p>
+      {/* FILTER */}
+      <div className="flex items-center gap-3">
+        <label className="text-sm font-medium">
+          Filter by Match Score:
+        </label>
+
+        <select
+          value={minMatchScore ?? ""}
+          onChange={(e) =>
+            setMinMatchScore(
+              e.target.value ? Number(e.target.value) : null
+            )
+          }
+          className="border px-2 py-1 rounded text-sm"
+        >
+          <option value="">All</option>
+          <option value="30">30%+</option>
+          <option value="50">50%+</option>
+          <option value="70">70%+</option>
+        </select>
+      </div>
+
+      {/* EMPTY / LIST */}
+      {filteredApplicants.length === 0 ? (
+        <p className="text-gray-500">
+          No applicants match the selected filter.
+        </p>
       ) : (
         <div className="space-y-4">
-          {applicants.map((app) => (
+          {filteredApplicants.map((app) => (
             <div
               key={app._id}
               className="border rounded p-4 flex justify-between items-center"
             >
               <div className="space-y-1">
-                <p className="font-medium text-lg">
-                  {app.applicantId.name}
-                </p>
+                {/* NAME + STATUS */}
+                <div className="flex items-center gap-2">
+                  <p className="font-medium text-lg">
+                    {app.applicantId.name}
+                  </p>
+
+                  <span
+                    className={`border px-2 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(
+                      app.status
+                    )}`}
+                  >
+                    {app.status.toUpperCase()}
+                  </span>
+                </div>
 
                 <p className="text-sm text-gray-600">
                   {app.applicantId.profile.headline}
