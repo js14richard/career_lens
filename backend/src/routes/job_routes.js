@@ -7,7 +7,8 @@ import {
   deleteJob,
   getAllJobs,
   getJobById,
-  getMyJobs
+  getMyJobs,
+  analyzeJobForApplicant
 } from "../controllers/job_controller.js";
 
 const router = express.Router();
@@ -22,6 +23,8 @@ router.patch("/:id/update", auth, role("recruiter"), updateJob);
 router.delete("/:id/delete", auth, role("recruiter"), deleteJob);
 
 router.get("/my-jobs", auth, role("recruiter"), getMyJobs);
+
+router.get("/:jobId/analyze", auth, role("applicant"), analyzeJobForApplicant);
 
 /**
  * Public routes (anyone can view jobs)

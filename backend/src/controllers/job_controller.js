@@ -1,4 +1,6 @@
 import Job from "../models/Job.js";
+import Resume from "../models/Resume.js";
+import { analyzeResumeAgainstJob } from "../services/jobAnalysis.js";
 
 /**
  * @desc    Create a new job (Recruiter Only)
@@ -196,5 +198,49 @@ export const getMyJobs = async (req, res) => {
   } catch (error) {
     console.error("Get My Jobs Error:", error);
     res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
+
+/**
+ * @desc    Analyze job for applicant (Pre-Apply)
+ * @route   GET /api/jobs/:id/analyze
+ * @access  Applicant
+ */
+export const analyzeJobForApplicant = async (req, res) => {
+  try {
+    const jobId = req.params.jobId;
+    const userId = req.user._id;
+
+    const job = await Job.findById(jobId);
+    if (!job) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Job not found" });
+    }
+
+    const resume = await Resume.findOne({ userId }).sort({
+      createdAt: -1
+    });
+
+    if (!resume) {
+      return res.status(400).json({
+        success: false,
+        message: "Resume not found"
+      });
+    }
+
+    const analysis = analyzeResumeAgainstJob(job, resume);
+
+    res.status(200).json({
+      success: true,
+      analysis
+    });
+  } catch (error) {
+    console.error("Analyze Job Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
   }
 };
