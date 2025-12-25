@@ -17,42 +17,44 @@ type Application = {
   };
 };
 
-function AppliedJobsTab() {
-  console.log("AppliedJobsTab mounted");
+function MyApplications() {
+  console.log("MyApplications mounted");
 
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const fetchAppliedJobs = async () => {
+    const fetchApplications = async () => {
       try {
-        const res = await api.get("/applications/my-applications");
+        const res = await api.get(
+          "/applications/my-applications"
+        );
         setApplications(res.data.applications || []);
       } catch (err) {
-        console.error("Failed to fetch applied jobs", err);
-        setError("Failed to load applied jobs");
+        console.error(err);
+        setError("Failed to load applications");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchAppliedJobs();
+    fetchApplications();
   }, []);
 
-  const getStatusClasses = (status: string) => {
-    switch (status.toLowerCase()) {
+  const getStatusClass = (status: string) => {
+    switch (status) {
       case "shortlisted":
+      case "selected":
         return "bg-green-100 text-green-700 border-green-300";
       case "rejected":
         return "bg-red-100 text-red-700 border-red-300";
-      case "applied":
       default:
-        return "bg-blue-100 text-blue-700 border-blue-300";
+        return "bg-yellow-100 text-yellow-700 border-yellow-300";
     }
   };
 
-  if (loading) return <p>Loading applied jobs...</p>;
+  if (loading) return <p>Loading applications...</p>;
   if (error) return <p className="text-red-600">{error}</p>;
 
   return (
@@ -67,7 +69,7 @@ function AppliedJobsTab() {
             key={app._id}
             className="border rounded p-4 space-y-2"
           >
-            <div className="flex justify-between items-start">
+            <div className="flex justify-between">
               <div>
                 <p className="font-medium text-lg">
                   {app.jobId.title}
@@ -80,7 +82,7 @@ function AppliedJobsTab() {
               </div>
 
               <span
-                className={`text-xs px-2 py-0.5 rounded border font-medium ${getStatusClasses(
+                className={`border px-2 py-0.5 rounded-full text-xs font-medium ${getStatusClass(
                   app.status
                 )}`}
               >
@@ -95,20 +97,15 @@ function AppliedJobsTab() {
             )}
 
             {(app.analysis?.missingSkills?.length ?? 0) > 0 && (
-              <div>
-                <p className="text-sm font-medium text-red-600 mb-1">
-                  Missing Skills
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {app.analysis!.missingSkills!.map((skill) => (
-                    <span
-                      key={skill}
-                      className="bg-red-100 text-red-700 border border-red-300 text-xs px-3 py-1 rounded-full"
-                    >
-                      {skill}
-                    </span>
-                  ))}
-                </div>
+              <div className="flex flex-wrap gap-2">
+                {app.analysis!.missingSkills!.map((skill) => (
+                  <span
+                    key={skill}
+                    className="bg-red-100 text-red-700 border border-red-300 text-xs px-3 py-1 rounded-full font-medium"
+                  >
+                    {skill}
+                  </span>
+                ))}
               </div>
             )}
 
@@ -123,4 +120,4 @@ function AppliedJobsTab() {
   );
 }
 
-export default AppliedJobsTab;
+export default MyApplications;
