@@ -56,7 +56,7 @@ function AppliedJobsTab() {
   if (error) return <p className="text-red-600">{error}</p>;
 
   return (
-    <div className="space-y-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       {applications.length === 0 ? (
         <p className="text-gray-500">
           You haven’t applied to any jobs yet.
@@ -65,13 +65,14 @@ function AppliedJobsTab() {
         applications.map((app) => (
           <div
             key={app._id}
-            className="border rounded p-4 space-y-2"
+            className="border rounded-lg p-5 space-y-3 bg-white hover:shadow-md transition"
           >
+            {/* HEADER */}
             <div className="flex justify-between items-start">
               <div>
-                <p className="font-medium text-lg">
+                <h3 className="text-lg font-semibold text-gray-900">
                   {app.jobId.title}
-                </p>
+                </h3>
                 <p className="text-sm text-gray-600">
                   {app.jobId.location} •{" "}
                   {app.jobId.experience}+ yrs •{" "}
@@ -80,7 +81,7 @@ function AppliedJobsTab() {
               </div>
 
               <span
-                className={`text-xs px-2 py-0.5 rounded border font-medium ${getStatusClasses(
+                className={`text-xs px-2 py-0.5 rounded-full border font-medium ${getStatusClasses(
                   app.status
                 )}`}
               >
@@ -88,12 +89,14 @@ function AppliedJobsTab() {
               </span>
             </div>
 
+            {/* MATCH SCORE */}
             {typeof app.analysis?.matchScore === "number" && (
               <p className="text-sm text-green-600 font-medium">
                 Match Score: {app.analysis.matchScore}%
               </p>
             )}
 
+            {/* MISSING SKILLS */}
             {(app.analysis?.missingSkills?.length ?? 0) > 0 && (
               <div>
                 <p className="text-sm font-medium text-red-600 mb-1">
@@ -112,6 +115,7 @@ function AppliedJobsTab() {
               </div>
             )}
 
+            {/* FOOTER */}
             <p className="text-xs text-gray-500">
               Applied on{" "}
               {new Date(app.createdAt).toLocaleDateString()}
