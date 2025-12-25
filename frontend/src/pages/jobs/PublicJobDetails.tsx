@@ -43,10 +43,6 @@ function PublicJobDetails() {
       return;
     }
 
-    if (role !== "candidate") {
-      alert("Only candidates can apply for jobs");
-      return;
-    }
 
     try {
       const res = await api.post(`/applications/apply/${jobId}`);

@@ -1,20 +1,24 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import CandidateDashboard from "../pages/applicant/Dashboard";
 import ProfileTab from "../pages/applicant/tabs/ProfileTab";
-import MyApplications from "../pages/applicant/applications/MyApplications";
+import AppliedJobsTab from "../pages/applicant/tabs/AppliedJobsTab";
+import JobDetails from "../pages/jobs/JobDetails";
 
 function ApplicantRoutes() {
   return (
     <Routes>
-      <Route path="dashboard" element={<CandidateDashboard />}>
-        {/* DEFAULT = PROFILE */}
-        <Route index element={<ProfileTab />} />
+      {/* ✅ JOB DETAILS MUST COME FIRST */}
+      <Route path="jobs/:id" element={<JobDetails />} />
 
+      {/* DASHBOARD */}
+      <Route path="dashboard" element={<CandidateDashboard />}>
+        <Route index element={<ProfileTab />} />
         <Route path="profile" element={<ProfileTab />} />
-        <Route path="applications" element={<MyApplications />} />
+        <Route path="applications" element={<AppliedJobsTab />} />
       </Route>
 
-      <Route path="*" element={<Navigate to="dashboard" />} />
+      {/* ❌ KEEP THIS LAST */}
+      <Route path="*" element={<Navigate to="dashboard" replace />} />
     </Routes>
   );
 }
