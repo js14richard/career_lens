@@ -16,6 +16,8 @@ type Job = {
 type Analysis = {
   matchScore?: number;
   missingSkills?: string[];
+  summary?: string;
+  aiFeedback?: string;
 };
 
 function JobDetails() {
@@ -25,29 +27,35 @@ function JobDetails() {
     (location.state as any)?.applicationStatus;
 
   const [job, setJob] = useState<Job | null>(null);
+  const [analysis, setAnalysis] = useState<Analysis | null>(null);
   const [alreadyApplied, setAlreadyApplied] = useState(false);
   const [applying, setApplying] = useState(false);
-  const [analysis, setAnalysis] = useState<Analysis | null>(null);
 
   useEffect(() => {
     if (!id) return;
 
-    // Fetch job details
-    api.get(`/jobs/${id}`).then((res) => {
-      setJob(res.data.job);
-    });
+    const fetchJobAndAnalysis = async () => {
+      try {
+        /* 1️⃣ Fetch job details */
+        const jobRes = await api.get(`/jobs/${id}`);
+        setJob(jobRes.data.job);
 
-    // Check if already applied + get analysis
-    api.get("/applications/my-applications").then((res) => {
-      const existingApp = res.data.applications?.find(
-        (app: any) => app.jobId?._id === id
-      );
+        /* 2️⃣ Fetch job analysis (NEW endpoint) */
+        const analysisRes = await api.get(`/jobs/${id}/analyze`);
+        setAnalysis(analysisRes.data.analysis);
 
-      if (existingApp) {
-        setAlreadyApplied(true);
-        setAnalysis(existingApp.analysis || null);
+        /* 3️⃣ Check if already applied (ONLY for button state) */
+        const appRes = await api.get("/applications/my-applications");
+        const existingApp = appRes.data.applications?.find(
+          (app: any) => app.jobId?._id === id
+        );
+        setAlreadyApplied(!!existingApp);
+      } catch (err) {
+        console.error("Failed to load job details", err);
       }
-    });
+    };
+
+    fetchJobAndAnalysis();
   }, [id]);
 
   const handleApply = async () => {
@@ -55,13 +63,8 @@ function JobDetails() {
 
     try {
       setApplying(true);
-
-      const res = await api.post(
-        `/applications/apply/${id}`
-      );
-
+      await api.post(`/applications/apply/${id}`);
       setAlreadyApplied(true);
-      setAnalysis(res.data.application?.analysis || null);
     } catch (err) {
       console.error("Failed to apply job", err);
       alert("Failed to apply job. Please try again.");
@@ -80,35 +83,28 @@ function JobDetails() {
 
       <div className="flex justify-between items-start">
         <div>
-          <h2 className="text-2xl font-semibold">
-            {job.title}
-          </h2>
+          <h2 className="text-2xl font-semibold">{job.title}</h2>
           <p className="text-gray-600">
-            {job.location} • {job.type} •{" "}
-            {job.experience}+ yrs
+            {job.location} • {job.type} • {job.experience}+ yrs
           </p>
         </div>
 
         {applicationStatus && (
-          <span className="bg-blue-100 text-blue-700 border border-blue-300 px-3 py-1 rounded-full text-sm font-medium">
+          <span className="bg-blue-100 text-blue-700 border px-3 py-1 rounded-full text-sm">
             {applicationStatus.toUpperCase()}
           </span>
         )}
       </div>
 
       <div>
-        <h3 className="font-medium mb-1">
-          Job Description
-        </h3>
+        <h3 className="font-medium mb-1">Job Description</h3>
         <p className="text-gray-700 whitespace-pre-line">
           {job.description}
         </p>
       </div>
 
       <div>
-        <h3 className="font-medium mb-2">
-          Required Skills
-        </h3>
+        <h3 className="font-medium mb-2">Required Skills</h3>
         <div className="flex flex-wrap gap-2">
           {job.skills.map((skill) => (
             <span
@@ -121,34 +117,42 @@ function JobDetails() {
         </div>
       </div>
 
-      {/* ✅ AI ANALYSIS */}
+      {/* ✅ JOB ANALYSIS (ALWAYS SHOWN) */}
       {analysis && (
-        <div className="border rounded p-4 space-y-3">
-          {typeof analysis.matchScore === "number" && (
-            <p className="text-sm font-medium">
-              Match Score:{" "}
-              <span className="text-green-600">
-                {analysis.matchScore}%
-              </span>
-            </p>
-          )}
+        <div className="border rounded p-4 space-y-3 bg-gray-50">
+          <p className="text-sm font-medium">
+            Match Score:{" "}
+            <span className="text-green-600">
+              {analysis.matchScore ?? 0}%
+            </span>
+          </p>
 
-          {(analysis.missingSkills?.length ?? 0) > 0 && (
+          {analysis.missingSkills?.length ? (
             <div>
               <p className="text-sm font-medium text-red-600 mb-1">
                 Missing Skills
               </p>
               <div className="flex flex-wrap gap-2">
-                {analysis.missingSkills!.map((skill) => (
+                {analysis.missingSkills.map((skill) => (
                   <span
                     key={skill}
-                    className="bg-red-100 text-red-700 border border-red-300 text-xs px-3 py-1 rounded-full"
+                    className="bg-red-100 text-red-700 border text-xs px-3 py-1 rounded-full"
                   >
                     {skill}
                   </span>
                 ))}
               </div>
             </div>
+          ) : (
+            <p className="text-sm text-green-700">
+              🎯 You meet all required skills
+            </p>
+          )}
+
+          {analysis.aiFeedback && (
+            <p className="text-sm text-gray-700 whitespace-pre-line">
+              {analysis.aiFeedback}
+            </p>
           )}
         </div>
       )}

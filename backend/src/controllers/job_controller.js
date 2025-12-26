@@ -1,6 +1,8 @@
 import Job from "../models/Job.js";
 import Resume from "../models/Resume.js";
-import { analyzeResumeAgainstJob } from "../services/jobAnalysis.js";
+import { calculateJobMatch } from "../utils/jobMatch.js";
+import {generateJobFitExplanation} from "../services/jobFitAIService.js";
+
 
 /**
  * @desc    Create a new job (Recruiter Only)
@@ -204,19 +206,20 @@ export const getMyJobs = async (req, res) => {
 
 /**
  * @desc    Analyze job for applicant (Pre-Apply)
- * @route   GET /api/jobs/:id/analyze
+ * @route   GET /api/jobs/:jobId/analyze
  * @access  Applicant
  */
 export const analyzeJobForApplicant = async (req, res) => {
   try {
-    const jobId = req.params.jobId;
+    const { jobId } = req.params;
     const userId = req.user._id;
 
     const job = await Job.findById(jobId);
     if (!job) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Job not found" });
+      return res.status(404).json({
+        success: false,
+        message: "Job not found"
+      });
     }
 
     const resume = await Resume.findOne({ userId }).sort({
@@ -230,11 +233,21 @@ export const analyzeJobForApplicant = async (req, res) => {
       });
     }
 
-    const analysis = analyzeResumeAgainstJob(job, resume);
+    // ✅ SINGLE SOURCE OF TRUTH
+    const { matchScore, explanation } =
+      calculateJobMatch(job, resume);
+
+    const aiFeedback =
+      await generateJobFitExplanation(explanation);
 
     res.status(200).json({
       success: true,
-      analysis
+      analysis: {
+        matchScore,
+        missingSkills: explanation.missingSkills,
+        summary: resume.summary || "",
+        aiFeedback
+      }
     });
   } catch (error) {
     console.error("Analyze Job Error:", error);
