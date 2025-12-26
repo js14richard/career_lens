@@ -60,7 +60,7 @@ function ViewApplicants() {
     }
   };
 
-  if (loading) return <p>Loading applicants...</p>;
+  if (loading) return <p className="text-gray-500">Loading applicants...</p>;
   if (error) return <p className="text-red-600">{error}</p>;
 
   return (
@@ -77,7 +77,7 @@ function ViewApplicants() {
         </Link>
       </div>
 
-      {/* FILTER */}
+      {/* Filter */}
       <div className="flex items-center gap-3">
         <label className="text-sm font-medium">
           Filter by Match Score:
@@ -99,56 +99,58 @@ function ViewApplicants() {
         </select>
       </div>
 
-      {/* EMPTY / LIST */}
+      {/* Empty State */}
       {filteredApplicants.length === 0 ? (
         <p className="text-gray-500">
           No applicants match the selected filter.
         </p>
       ) : (
-        <div className="space-y-4">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredApplicants.map((app) => (
             <div
               key={app._id}
-              className="border rounded p-4 flex justify-between items-center"
+              className="rounded-xl border bg-white p-5 shadow-sm hover:shadow-md transition"
             >
-              <div className="space-y-1">
-                {/* NAME + STATUS */}
-                <div className="flex items-center gap-2">
-                  <p className="font-medium text-lg">
-                    {app.applicantId.name}
-                  </p>
+              {/* Header */}
+              <div className="flex justify-between items-start">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  {app.applicantId.name}
+                </h3>
 
-                  <span
-                    className={`border px-2 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(
-                      app.status
-                    )}`}
-                  >
-                    {app.status.toUpperCase()}
-                  </span>
-                </div>
-
-                <p className="text-sm text-gray-600">
-                  {app.applicantId.profile.headline}
-                </p>
-
-                {app.analysis?.matchScore !== undefined && (
-                  <p className="text-sm text-green-600 font-medium">
-                    Match Score: {app.analysis.matchScore}%
-                  </p>
-                )}
-
-                <p className="text-xs text-gray-500">
-                  Applied on{" "}
-                  {new Date(app.createdAt).toLocaleDateString()}
-                </p>
+                <span
+                  className={`border px-2 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClass(
+                    app.status
+                  )}`}
+                >
+                  {app.status.toUpperCase()}
+                </span>
               </div>
 
+              {/* Headline */}
+              <p className="mt-1 text-sm text-gray-600">
+                {app.applicantId.profile.headline}
+              </p>
+
+              {/* Match Score */}
+              {app.analysis?.matchScore !== undefined && (
+                <p className="mt-2 text-sm font-medium text-green-600">
+                  Match Score: {app.analysis.matchScore}%
+                </p>
+              )}
+
+              {/* Date */}
+              <p className="mt-1 text-xs text-gray-500">
+                Applied on{" "}
+                {new Date(app.createdAt).toLocaleDateString()}
+              </p>
+
+              {/* CTA */}
               <Link
                 to={`/recruiter/dashboard/applicants/${app.applicantId._id}`}
                 state={{ applicant: app }}
-                className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                className="mt-4 inline-block text-sm font-medium text-blue-600"
               >
-                View Profile
+                View Profile →
               </Link>
             </div>
           ))}
