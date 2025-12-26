@@ -10,6 +10,8 @@ import Register from "../pages/auth/Register";
 import RecruiterRoutes from "./RecruiterRoutes";
 import ProtectedRoute from "../auth/ProtectedRoute";
 import ApplicantRoutes from "./ApplicantRoutes";
+import ExploreJobs from "../pages/static/ExploreJobs";
+
 
 import PublicJobDetails from "../pages/jobs/PublicJobDetails";
 
@@ -24,6 +26,8 @@ function AppRoutes() {
       <Route path="/contact" element={<Contact />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
+      <Route path="/jobs" element={<ExploreJobs />} />
+
 
       <Route path="/jobs/:jobId" element={<PublicJobDetails />} />
 
