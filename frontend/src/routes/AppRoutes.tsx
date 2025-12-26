@@ -2,7 +2,6 @@ import { Routes, Route } from "react-router-dom";
 import Home from "../pages/static/Home";
 import About from "../pages/static/About";
 import HowItWorks from "../pages/static/HowItWorks";
-import Features from "../pages/static/Features";
 import Contact from "../pages/static/Contact";
 import NotFound from "../pages/static/NotFound";
 import Login from "../pages/auth/Login";
@@ -22,7 +21,6 @@ function AppRoutes() {
       <Route path="/" element={<Home />} />
       <Route path="/about" element={<About />} />
       <Route path="/how-it-works" element={<HowItWorks />} />
-      <Route path="/features" element={<Features />} />
       <Route path="/contact" element={<Contact />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />

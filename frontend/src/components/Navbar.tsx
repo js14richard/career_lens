@@ -18,18 +18,22 @@ function Navbar() {
         <Link to="/" className="text-gray-700 hover:text-blue-600">
           Home
         </Link>
+
         <Link to="/about" className="text-gray-700 hover:text-blue-600">
           About
         </Link>
-        <Link to="/features" className="text-gray-700 hover:text-blue-600">
-          Features
+
+        <Link to="/how-it-works" className="text-gray-700 hover:text-blue-600">
+          How It Works
         </Link>
+
 
         {!isAuthenticated ? (
           <>
             <Link to="/login" className="text-gray-700 hover:text-blue-600">
               Login
             </Link>
+
             <Link to="/register" className="text-gray-700 hover:text-blue-600">
               Register
             </Link>
