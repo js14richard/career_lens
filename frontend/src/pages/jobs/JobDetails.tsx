@@ -36,15 +36,12 @@ function JobDetails() {
 
     const fetchJobAndAnalysis = async () => {
       try {
-        /* 1️⃣ Fetch job details */
         const jobRes = await api.get(`/jobs/${id}`);
         setJob(jobRes.data.job);
 
-        /* 2️⃣ Fetch job analysis (NEW endpoint) */
         const analysisRes = await api.get(`/jobs/${id}/analyze`);
         setAnalysis(analysisRes.data.analysis);
 
-        /* 3️⃣ Check if already applied (ONLY for button state) */
         const appRes = await api.get("/applications/my-applications");
         const existingApp = appRes.data.applications?.find(
           (app: any) => app.jobId?._id === id
@@ -117,7 +114,6 @@ function JobDetails() {
         </div>
       </div>
 
-      {/* ✅ JOB ANALYSIS (ALWAYS SHOWN) */}
       {analysis && (
         <div className="border rounded p-4 space-y-3 bg-gray-50">
           <p className="text-sm font-medium">
@@ -157,7 +153,6 @@ function JobDetails() {
         </div>
       )}
 
-      {/* APPLY BUTTON */}
       <button
         onClick={handleApply}
         disabled={alreadyApplied || applying}

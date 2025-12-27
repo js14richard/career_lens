@@ -3,7 +3,6 @@ import { Outlet, NavLink } from "react-router-dom";
 function RecruiterDashboard() {
   return (
     <div className="flex min-h-screen">
-      {/* SIDEBAR */}
       <aside className="w-64 border-r p-4">
         <h2 className="font-semibold mb-4">
           Recruiter Dashboard
@@ -35,7 +34,6 @@ function RecruiterDashboard() {
         </nav>
       </aside>
 
-      {/* MAIN CONTENT */}
       <main className="flex-1 p-6 bg-gray-50">
         <Outlet />
       </main>

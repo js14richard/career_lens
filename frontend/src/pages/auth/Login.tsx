@@ -37,7 +37,6 @@ function Login() {
 
       const role = res.data.user.role;
 
-      // ✅ IMPORTANT: store token + role
       login(res.data.token, role);
 
       navigate(

@@ -18,7 +18,6 @@ function ProtectedRoute({ allowedRoles }: Props) {
     return <Navigate to="/" replace />;
   }
 
-  // ✅ REQUIRED FOR NESTED ROUTES
   return <Outlet />;
 }
 

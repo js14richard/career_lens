@@ -2,9 +2,6 @@ import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import api from "../api/axios";
 
-/**
- * Use BACKEND roles directly
- */
 type UserRole = "applicant" | "recruiter";
 
 type AuthContextType = {
@@ -38,7 +35,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const res = await api.get("/user/me");
 
-        // ✅ Direct backend role
         setIsAuthenticated(true);
         setRole(res.data.user.role);
       } catch (err) {

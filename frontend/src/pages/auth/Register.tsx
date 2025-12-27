@@ -35,13 +35,10 @@ function Register() {
     setLoading(true);
 
     try {
-      // ✅ Register user (single API call)
       await api.post("/auth/register", formData);
 
-      // ✅ Reset form after successful registration
       setFormData(initialFormState);
 
-      // ✅ Redirect to login
       navigate("/login");
     } catch (err: any) {
       setError(

@@ -1,9 +1,7 @@
 function Home() {
   return (
     <div className="px-6 py-10 max-w-6xl mx-auto">
-      {/* Hero Section */}
       <div className="grid md:grid-cols-2 gap-10 items-center">
-        {/* Left Content */}
         <div>
           <h1 className="text-4xl font-bold text-gray-900">
             Career Lens
@@ -21,7 +19,6 @@ function Home() {
             applications.
           </p>
 
-          {/* CTA */}
           <div className="mt-6 flex gap-4">
             <a
               href="/jobs"
@@ -39,7 +36,6 @@ function Home() {
           </div>
         </div>
 
-        {/* Right Image */}
         <div>
           <img
             src="https://res.cloudinary.com/js14richardcloud/image/upload/v1766772529/home-image_qrvxlq.jpg"
@@ -49,7 +45,6 @@ function Home() {
         </div>
       </div>
 
-      {/* Why Career Lens */}
       <div className="mt-16">
         <h2 className="text-2xl font-semibold text-gray-900">
           Why Career Lens?

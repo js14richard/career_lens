@@ -25,7 +25,6 @@ function CreateJob() {
     e.preventDefault();
     setError("");
 
-    // ✅ SALARY VALIDATION
     if (
       minSalary > 0 &&
       maxSalary > 0 &&
@@ -82,7 +81,6 @@ function CreateJob() {
         onSubmit={handleSubmit}
         className="space-y-4"
       >
-        {/* TITLE */}
         <div>
           <label className="block text-sm font-medium">
             Job Title
@@ -98,7 +96,6 @@ function CreateJob() {
           />
         </div>
 
-        {/* DESCRIPTION */}
         <div>
           <label className="block text-sm font-medium">
             Description
@@ -114,7 +111,6 @@ function CreateJob() {
           />
         </div>
 
-        {/* SKILLS */}
         <div>
           <label className="block text-sm font-medium">
             Skills (comma separated)
@@ -130,7 +126,6 @@ function CreateJob() {
           />
         </div>
 
-        {/* EXPERIENCE */}
         <div>
           <label className="block text-sm font-medium">
             Experience Required (years)
@@ -148,7 +143,6 @@ function CreateJob() {
           />
         </div>
 
-        {/* JOB TYPE */}
         <div>
           <label className="block text-sm font-medium">
             Job Type
@@ -172,7 +166,6 @@ function CreateJob() {
           </select>
         </div>
 
-        {/* LOCATION */}
         <div>
           <label className="block text-sm font-medium">
             Location
@@ -187,7 +180,6 @@ function CreateJob() {
           />
         </div>
 
-        {/* REMOTE */}
         <div className="flex items-center gap-2">
           <input
             type="checkbox"
@@ -203,7 +195,6 @@ function CreateJob() {
           </label>
         </div>
 
-        {/* SALARY RANGE */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium">
@@ -240,7 +231,6 @@ function CreateJob() {
           </div>
         </div>
 
-        {/* ACTIONS */}
         <div className="flex gap-3 pt-2">
           <button
             type="submit"

@@ -74,7 +74,6 @@ function JobList() {
             to={`/recruiter/dashboard/jobs/${job._id}`}
             className="block rounded-xl border bg-white p-5 shadow-sm hover:shadow-md transition"
           >
-            {/* Header */}
             <div className="flex justify-between items-start">
               <h3 className="text-lg font-semibold text-gray-900">
                 {job.title}
@@ -84,18 +83,16 @@ function JobList() {
               </span>
             </div>
 
-            {/* Meta */}
+
             <p className="mt-1 text-sm text-gray-600">
               {job.location} • {job.type}
               {job.isRemoteJob && " • Remote"}
             </p>
 
-            {/* Description */}
             <p className="mt-3 text-sm text-gray-700 line-clamp-3">
               {job.description}
             </p>
 
-            {/* Skills */}
             <div className="mt-4 flex flex-wrap gap-2">
               {job.skills.slice(0, 5).map((skill) => (
                 <span
@@ -112,7 +109,6 @@ function JobList() {
               )}
             </div>
 
-            {/* Footer */}
             <div className="mt-4 text-sm text-blue-600 font-medium">
               View details →
             </div>

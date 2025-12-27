@@ -12,10 +12,9 @@ function RecruiterRoutes() {
   return (
     <Routes>
       <Route path="dashboard" element={<RecruiterDashboard />}>
-        {/* DEFAULT TAB */}
         <Route index element={<JobList />} />
 
-        {/* JOB ROUTES */}
+        
         <Route path="jobs" element={<JobList />} />
         <Route path="jobs/create" element={<CreateJob />} />
         <Route path="jobs/:jobId" element={<JobDetails />} />
@@ -24,7 +23,7 @@ function RecruiterRoutes() {
         <Route path="applicants/:applicantId" element={<ApplicantProfile />}/>
       </Route>
 
-      {/* SAFETY */}
+
       <Route
         path="*"
         element={<Navigate to="/recruiter/dashboard" replace />}

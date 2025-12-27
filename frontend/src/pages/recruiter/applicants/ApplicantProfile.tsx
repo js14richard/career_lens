@@ -75,7 +75,6 @@ function ApplicantProfile() {
 
   return (
     <div className="space-y-8 max-w-4xl">
-      {/* ================= TOP ACTION BAR ================= */}
       <div className="flex items-center gap-3">
         <Link
           to={-1 as any}
@@ -95,7 +94,6 @@ function ApplicantProfile() {
           </a>
         )}
 
-        {/* STATUS BADGE */}
         <span
           className={`ml-auto border px-3 py-1 rounded-full text-xs font-medium ${statusBadgeClass}`}
         >
@@ -105,7 +103,6 @@ function ApplicantProfile() {
 
       <h2 className="text-xl font-semibold">Applicant Profile</h2>
 
-      {/* ================= SELECT / REJECT ACTIONS ================= */}
       {!isFinalized && (
         <div className="flex gap-3">
           <button
@@ -124,7 +121,6 @@ function ApplicantProfile() {
         </div>
       )}
 
-      {/* ================= BASIC INFO ================= */}
       <div className="flex items-center gap-4">
         {profile?.pictureUrl && (
           <img
@@ -147,7 +143,6 @@ function ApplicantProfile() {
         </div>
       </div>
 
-      {/* ================= CONTACT ================= */}
       <div className="text-sm space-y-1">
         <p>
           <span className="font-medium">Email:</span>{" "}
@@ -159,7 +154,6 @@ function ApplicantProfile() {
         </p>
       </div>
 
-      {/* ================= AI ANALYSIS ================= */}
       <div className="border-t pt-4 space-y-3">
         <p className="font-medium">AI Match Analysis</p>
 
@@ -195,7 +189,6 @@ function ApplicantProfile() {
         )}
       </div>
 
-      {/* ================= RESUME ================= */}
       <div className="border-t pt-4 space-y-4">
         <p className="font-medium">Resume Details</p>
 

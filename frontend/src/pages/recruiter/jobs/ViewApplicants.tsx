@@ -111,7 +111,7 @@ function ViewApplicants() {
               key={app._id}
               className="rounded-xl border bg-white p-5 shadow-sm hover:shadow-md transition"
             >
-              {/* Header */}
+
               <div className="flex justify-between items-start">
                 <h3 className="text-lg font-semibold text-gray-900">
                   {app.applicantId.name}
@@ -126,25 +126,21 @@ function ViewApplicants() {
                 </span>
               </div>
 
-              {/* Headline */}
               <p className="mt-1 text-sm text-gray-600">
                 {app.applicantId.profile.headline}
               </p>
 
-              {/* Match Score */}
               {app.analysis?.matchScore !== undefined && (
                 <p className="mt-2 text-sm font-medium text-green-600">
                   Match Score: {app.analysis.matchScore}%
                 </p>
               )}
 
-              {/* Date */}
               <p className="mt-1 text-xs text-gray-500">
                 Applied on{" "}
                 {new Date(app.createdAt).toLocaleDateString()}
               </p>
 
-              {/* CTA */}
               <Link
                 to={`/recruiter/dashboard/applicants/${app.applicantId._id}`}
                 state={{ applicant: app }}

@@ -1,7 +1,7 @@
 function About() {
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-10">
-      {/* Header */}
+
       <div>
         <h1 className="text-3xl font-bold text-gray-900">
           About Career Lens
@@ -13,9 +13,7 @@ function About() {
         </p>
       </div>
 
-      {/* Content + Image */}
       <div className="grid md:grid-cols-2 gap-8 items-center">
-        {/* Left Content */}
         <div className="space-y-4 text-gray-700">
           <p>
             Traditional job portals often overwhelm recruiters with a
@@ -36,7 +34,6 @@ function About() {
           </p>
         </div>
 
-        {/* Right Image */}
         <div className="flex justify-end">
           <img
             src="https://res.cloudinary.com/js14richardcloud/image/upload/v1766774950/about-us_hqbx3j.jpg"
@@ -46,7 +43,6 @@ function About() {
         </div>
       </div>
 
-      {/* Mission */}
       <div className="border rounded-lg p-4 bg-gray-50">
         <p className="text-gray-700">
           🎯 <strong>Our Mission:</strong> To make hiring faster, fairer,

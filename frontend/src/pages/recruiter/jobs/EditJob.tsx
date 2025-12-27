@@ -31,7 +31,7 @@ function EditJob() {
       try {
         const res = await api.get(`/jobs/${jobId}`);
         setJob(res.data.job);
-        setOriginalJob(res.data.job); // snapshot for comparison
+        setOriginalJob(res.data.job);
       } catch {
         setError("Failed to load job");
       } finally {
@@ -85,7 +85,7 @@ function EditJob() {
 
       setSuccessMessage("Job updated successfully");
 
-      setOriginalJob(job); // reset dirty state
+      setOriginalJob(job);
 
       setTimeout(() => {
         setSuccessMessage("");
@@ -106,14 +106,12 @@ function EditJob() {
     <div className="space-y-5 max-w-3xl">
       <h2 className="text-xl font-semibold">Edit Job</h2>
 
-      {/* Success Toast */}
       {successMessage && (
         <div className="bg-green-100 text-green-800 px-4 py-2 rounded">
           {successMessage}
         </div>
       )}
 
-      {/* Job Title */}
       <div>
         <label className="text-sm font-medium">Job Title</label>
         <input
@@ -124,7 +122,6 @@ function EditJob() {
         />
       </div>
 
-      {/* Description */}
       <div>
         <label className="text-sm font-medium">Description</label>
         <textarea
@@ -136,7 +133,6 @@ function EditJob() {
         />
       </div>
 
-      {/* Skills */}
       <div>
         <label className="text-sm font-medium">
           Skills (comma separated)
@@ -148,7 +144,6 @@ function EditJob() {
         />
       </div>
 
-      {/* Location */}
       <div>
         <label className="text-sm font-medium">Location</label>
         <input
@@ -159,7 +154,6 @@ function EditJob() {
         />
       </div>
 
-      {/* Job Type */}
       <div>
         <label className="text-sm font-medium">Job Type</label>
         <select
@@ -175,7 +169,6 @@ function EditJob() {
         </select>
       </div>
 
-      {/* Experience */}
       <div>
         <label className="text-sm font-medium">
           Experience (years)
@@ -189,7 +182,6 @@ function EditJob() {
         />
       </div>
 
-      {/* Remote */}
       <div className="flex items-center gap-2">
         <input
           type="checkbox"
@@ -200,7 +192,6 @@ function EditJob() {
         <label className="text-sm font-medium">Remote Job</label>
       </div>
 
-      {/* Salary */}
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="text-sm font-medium">Salary Min</label>
@@ -224,7 +215,6 @@ function EditJob() {
         </div>
       </div>
 
-      {/* Actions */}
       <div className="flex gap-3 pt-4 border-t">
         <button
           onClick={handleSubmit}
