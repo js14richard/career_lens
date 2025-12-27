@@ -233,7 +233,6 @@ export const analyzeJobForApplicant = async (req, res) => {
       });
     }
 
-    // ✅ SINGLE SOURCE OF TRUTH
     const { matchScore, explanation } =
       calculateJobMatch(job, resume);
 

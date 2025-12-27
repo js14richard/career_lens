@@ -173,7 +173,6 @@ export const analyzeResume = async (req, res) => {
       });
     }
 
-    // Prevent re-analysis
     if (resume.skills.length > 0) {
       return res.status(200).json({
         success: true,
@@ -226,7 +225,6 @@ export const analyzeResume = async (req, res) => {
   }
 };
 
-/* ---------------- HELPERS ---------------- */
 
 function extractStartDate(duration = "") {
   if (!duration) return "";
